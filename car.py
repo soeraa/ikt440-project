@@ -23,8 +23,9 @@ actions = [left, right]
 
 
 ##some init action
-action_n = [speed_up for ob in observation_n]
 observation_n = env.reset()
+action_n = [speed_up for ob in observation_n]
+
 s = 0
 
 
