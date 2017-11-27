@@ -6,8 +6,6 @@ import csv
 import tensorflow as tf
 from model import cnn
 
-
-
 classes = {'up': 0, 'right': 1, 'left': 2}
 num_classes = 3
 train_split = 0.8 
