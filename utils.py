@@ -17,11 +17,3 @@ def processFrame(observation_n):
 def cropFrame(obs):
 	return obs[84:564, 18:658, :]
 
-
-def processForTraining(observation_n):
-	if observation_n is not None:
-		obs = observation_n[0]['vision']
-		obs = cropFrame(obs)
-		obs = cv2.resize(obs, (64, 64))
-		obs = cv2.cvtColor(obs, cv2.COLOR_BGR2GRAY)
-	return obs

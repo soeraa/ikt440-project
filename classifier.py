@@ -4,10 +4,9 @@ import cv2
 import utils
 import csv
 import tensorflow as tf
+
 import random
 from model import cnn
-
-
 
 
 classes = {'up': 0, 'right': 1, 'left': 2}
@@ -109,6 +108,7 @@ def main():
 	# print(type(train_x))
 	# print(type(train_y))
 
+
 	## Instantiate the model
 	cnn_classifier = tf.estimator.Estimator(
 		model_fn = cnn,
@@ -118,7 +118,8 @@ def main():
 	logging_hook = tf.train.LoggingTensorHook(
 		tensors=tensors_to_log, every_n_iter=50)
 
-	# Train the model
+
+	## Train the model
 	train_input_fn = tf.estimator.inputs.numpy_input_fn(
 		x = {'x':train_x},
 		y = train_y,
@@ -128,7 +129,7 @@ def main():
 
 	cnn_classifier.train(
 		input_fn = train_input_fn,
-		steps = 50000,
+		steps = 10000,
 		hooks=[logging_hook])
 
 	## Test the model
@@ -149,3 +150,4 @@ def main():
 
 if __name__=="__main__":
 	main()
+
