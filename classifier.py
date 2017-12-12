@@ -4,7 +4,9 @@ import cv2
 import utils
 import csv
 import tensorflow as tf
+import random
 from model import cnn
+
 
 
 
@@ -12,19 +14,20 @@ classes = {'up': 0, 'right': 1, 'left': 2}
 num_classes = 3
 train_split = 0.8 
 cwd = os.getcwd()
-data_path = '/home/aasmund/Documents/universe/recordings/images'
+data_path = '/home/aasmund/Documents/universe/recordings/parsed/'
 
 def parse_image(img):
-	img = cv2.resize(img, (120, 160))
+	# img = cv2.resize(img, (64, 64))
 	img = img.astype(np.float32)
 	img *= (1.0 / 255.0)
-	img = np.reshape(img, [120, 160, 1])
+	img = np.reshape(img, [64, 64, 1])
 	return img
 
 
 
 def get_data():
 
+	data = []
 	input_data = []
 	output_data = []
 	direction_folders = os.listdir(data_path)
@@ -34,10 +37,16 @@ def get_data():
 		for image in os.listdir(images_path):
 			# 0 entails grayscale image
 			image_path = os.path.join(images_path, image)
+			# print(image_path)
 			img = cv2.imread(image_path, 0)
 			input_data.append(parse_image(img))
 			output_data.append(classes[str(direction).lower()])
-	return np.array(input_data, dtype=np.float32), np.array(output_data, dtype=np.int32)
+
+			data.append((parse_image(img), classes[str(direction).lower()]))
+		print(len(input_data)-l)
+
+	return data
+	# return np.array(input_data, dtype=np.float32), np.array(output_data, dtype=np.int32)
 
 def classify(img):
 	cnn_classifier = tf.estimator.Estimator(
@@ -60,31 +69,45 @@ def classify(img):
 
 def main():
 	tf.logging.set_verbosity(tf.logging.INFO)
+	data = get_data()
+	print(type(data))
+	print('length of training data: ', len(data))
 
-	inputs, outputs = get_data()
-	
+	random.shuffle(data)
 
-	print('Inputs: ', len(inputs))
-	print('Outputs: ', len(outputs))
-	if(len(inputs) < len(outputs)):
-		outputs = outputs[:len(inputs)]
-	else:
-		inputs = inputs[:len(outputs)]
+	split = int(len(data)*train_split)
+	train = data[:split]
+	test = data[split:]
 
-	print('Outputs after length reduction:', len(outputs))
-	# print(outputs[250:600])
+	train_x = np.array([train[i][0] for i in range(len(train))], dtype=np.float32)
+	train_y = np.array([train[i][1] for i in range(len(train))], dtype=np.int32)
 
-	## create train and test set
-	split = int(len(inputs)*train_split)
+	print(train_y)
 
-	# train_x = inputs
-	# train_y = outputs
-	train_x = inputs[:split]
-	train_y = outputs[:split]
+	# inputs, outputs = get_data()
 
 
-	print(type(train_x))
-	print(type(train_y))
+	# print('Inputs: ', len(inputs))
+	# print('Outputs: ', len(outputs))
+	# if(len(inputs) < len(outputs)):
+	# 	outputs = outputs[:len(inputs)]
+	# else:
+	# 	inputs = inputs[:len(outputs)]
+
+	# print('Outputs after length reduction:', len(outputs))
+	# # print(outputs[250:600])
+
+	# ## create train and test set
+	# split = int(len(inputs)*train_split)
+
+	# # train_x = inputs
+	# # train_y = outputs
+	# train_x = inputs[:split]
+	# train_y = outputs[:split]
+
+
+	# print(type(train_x))
+	# print(type(train_y))
 
 	## Instantiate the model
 	cnn_classifier = tf.estimator.Estimator(
@@ -95,7 +118,7 @@ def main():
 	logging_hook = tf.train.LoggingTensorHook(
 		tensors=tensors_to_log, every_n_iter=50)
 
-	## Train the model
+	# Train the model
 	train_input_fn = tf.estimator.inputs.numpy_input_fn(
 		x = {'x':train_x},
 		y = train_y,
@@ -105,19 +128,23 @@ def main():
 
 	cnn_classifier.train(
 		input_fn = train_input_fn,
-		steps = 10000,
+		steps = 50000,
 		hooks=[logging_hook])
 
 	## Test the model
 
-	test_x = inputs[split:]
-	test_y = outputs[split:]
+	# test_x = inputs[split:]
+	# test_y = outputs[split:]
+	test_x = np.array([test[i][0] for i in range(len(test))], dtype=np.float32)
+	test_y = np.array([test[i][1] for i in range(len(test))], dtype=np.int32)
+
 	test_input_fn = tf.estimator.inputs.numpy_input_fn(
 		x = {'x': test_x},
 		y = test_y,
 		num_epochs = 1,
 		shuffle = False)	
 	res = cnn_classifier.evaluate(input_fn = test_input_fn)
+	print('classifcation on test is: ')
 	print(res)
 
 if __name__=="__main__":

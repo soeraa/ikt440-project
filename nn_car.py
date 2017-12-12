@@ -6,12 +6,14 @@ import numpy as np
 import cv2
 import utils
 import tensorflow as tf
+import os
 from model import cnn
 from classifier import classify
 
 print('Loading..')
 
 env_id = 'flashgames.CoasterRacer-v0'
+image_save_path = '/recordings/videos/frames'
 
 env = gym.make(env_id)
 env.configure(fps=5, remotes=1)
@@ -50,7 +52,20 @@ while True:
 	print('prediction action is: ',index)
 	action_n = [actions[index] for ob in observation_n]
 
+
 	observation_n, reward_n, done_n, info = env.step(action_n)
+
+	# processed = utils.processForTraining(observation_n)
+
+	# file_name = 'train_' + str(s) + '.png'
+	# save_path = os.path.join(image_save_path, file_name)
+	# try:
+	# 	print('showing image')
+	# 	cv2.imwrite(str(save_path), processed)
+	# 	print('save path', save_path)
+	# except Exception as e:
+	# 	print(e)
+	# s+=1
 
 	if(reward_n[0] > 0.0):
 		# if positive reward we will reinforce and encourage learning
