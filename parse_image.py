@@ -20,6 +20,7 @@ for direction in direction_folders:
 		p_image_path = os.path.join(p_images_path, image_name)
 		# 0 entails grayscale image
 		img = cv2.imread(image_path, 0)
+		print(img.shape)
 		img = cv2.resize(img, (64, 64))
 		cv2.imwrite(p_image_path, img)
 		# print(p_image_path)

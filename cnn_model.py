@@ -63,6 +63,12 @@ def cnn(features, labels, mode):
 	optimizer = tf.train.AdamOptimizer(learning_rate=0.001)
 	train_step = optimizer.minimize(loss=loss, global_step=tf.train.get_global_step())
 
+	tf.summary.scalar('CNN Loss', loss)
+
+	correct_prediction = tf.equal(tf.argmax(predictions['probabilities'], 1), tf.argmax(y, 1))
+	accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+	tf.summary.scalar("CNN Accuracy", accuracy)
+
 	return tf.estimator.EstimatorSpec(mode=mode,loss=loss, train_op=train_step)
 
 
