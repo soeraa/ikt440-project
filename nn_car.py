@@ -6,10 +6,7 @@ import numpy as np
 import cv2
 import utils
 import tensorflow as tf
-<<<<<<< HEAD
 import os
-=======
->>>>>>> 31622488e152602986878286eef58bce26edb035
 from model import cnn
 from classifier import classify
 
@@ -46,9 +43,12 @@ while True:
 		action_n = [[('KeyEvent', 'ArrowUp', True)] for ob in observation_n]
 		observation_n, reward_n, done_n, info = env.step(action_n)
 
-	observation = utils.processFrame(observation_n)
+	print(len(observation_n[0]['vision']))
 
-	predictions = classify(observation)
+	observation = utils.processFrame(observation_n, 'canny') # true for canny process
+	# predictions = classify(observation, False) 
+	predictions = classify(observation, 'canny')
+	
 
 	index = predictions[0]['classes']
 	print('prediction action is: ',index)
